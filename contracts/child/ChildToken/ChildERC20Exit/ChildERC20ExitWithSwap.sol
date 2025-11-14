@@ -14,16 +14,17 @@ interface ISwapper {
 }
 
 interface IChildERC20Relay {
-    function withdrawBTTByRelayer(
+    function withdrawToByRelayer(
         address to,
         IChildToken tokenWithdraw,
         IChildToken tokenExit,
         uint256 amount,
-        address payable relayer,
+        address relayer,
         bool withRefuel,
         uint256 expectedRefuelFee,
         uint256 expectedRelayerFee
-    ) external payable;
+    )
+    external;
 }
 
 contract ChildERC20ExitWithSwap is
@@ -143,7 +144,7 @@ contract ChildERC20ExitWithSwap is
         IERC20(tokenWithdraw).safeIncreaseAllowance(address(swapper), amount);
         swapper.swap(address(tokenWithdraw), address(tokenExit), amount);
 
-        childERC20RelayProxy.withdrawBTTByRelayer(
+        childERC20RelayProxy.withdrawToByRelayer(
             to,
             tokenExit,
             tokenExit,
