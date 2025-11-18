@@ -138,11 +138,20 @@ contract ChildERC20ExitWithSwap is
         uint256 expectedRefuelFee,
         uint256 expectedRelayerFee
     ) external open {
+
+        IERC20(tokenWithdraw).safeTransferFrom(
+            msgSender(),
+            address(this),
+            amount
+        );
+
         uint256 _nonce = nonce + 1;
         nonce = _nonce;
 
         IERC20(tokenWithdraw).safeIncreaseAllowance(address(swapper), amount);
         swapper.swap(address(tokenWithdraw), address(tokenExit), amount);
+
+        IERC20(tokenExit).safeIncreaseAllowance(address(childERC20RelayProxy), amount);
 
         childERC20RelayProxy.withdrawToByRelayer(
             to,
