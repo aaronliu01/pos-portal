@@ -2,6 +2,7 @@ pragma solidity 0.6.6;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {AccessControlMixin} from "../../../common/AccessControlMixin.sol";
 import {ContextMixin} from "../../../common/ContextMixin.sol";
 import {NativeMetaTransaction} from "../../../common/NativeMetaTransaction.sol";
@@ -23,15 +24,15 @@ interface IChildERC20Relay {
         bool withRefuel,
         uint256 expectedRefuelFee,
         uint256 expectedRelayerFee
-    )
-    external;
+    ) external;
 }
 
 contract ChildERC20ExitWithSwap is
     AccessControlMixin,
     NativeMetaTransaction,
     ContextMixin,
-    IChildERC20Exit
+    IChildERC20Exit,
+    ReentrancyGuard
 {
     event RelayExit(
         uint256 indexed id,
@@ -50,8 +51,8 @@ contract ChildERC20ExitWithSwap is
     uint256 public nonce;
     bool public isOpen = true;
 
-    ISwapper public swapper;
-    IChildERC20Relay public childERC20RelayProxy;
+    ISwapper public immutable swapper;
+    IChildERC20Relay public immutable childERC20RelayProxy;
 
     constructor(
         address admin,
@@ -137,7 +138,9 @@ contract ChildERC20ExitWithSwap is
         bool withRefuel,
         uint256 expectedRefuelFee,
         uint256 expectedRelayerFee
-    ) external open {
+    ) external open nonReentrant {
+        uint256 _nonce = nonce + 1;
+        nonce = _nonce;
 
         IERC20(tokenWithdraw).safeTransferFrom(
             msgSender(),
@@ -145,13 +148,13 @@ contract ChildERC20ExitWithSwap is
             amount
         );
 
-        uint256 _nonce = nonce + 1;
-        nonce = _nonce;
-
         IERC20(tokenWithdraw).safeIncreaseAllowance(address(swapper), amount);
         swapper.swap(address(tokenWithdraw), address(tokenExit), amount);
 
-        IERC20(tokenExit).safeIncreaseAllowance(address(childERC20RelayProxy), amount);
+        IERC20(tokenExit).safeIncreaseAllowance(
+            address(childERC20RelayProxy),
+            amount
+        );
 
         childERC20RelayProxy.withdrawToByRelayer(
             to,
