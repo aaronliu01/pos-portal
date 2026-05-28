@@ -37,6 +37,7 @@ contract TronRootChainManager is
     bytes32 public constant MAP_TOKEN = keccak256("MAP_TOKEN");
     address public constant ETHER_ADDRESS = 0xff00000000000000000000000000000000000001;
     bytes32 public constant MAPPER_ROLE = keccak256("MAPPER_ROLE");
+    bytes32 public constant CFO_ROLE = keccak256("CFO_ROLE");
     uint64 public constant CHAIN_ID = 1;
 
     function _msgSender()
