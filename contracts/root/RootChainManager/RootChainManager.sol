@@ -35,9 +35,10 @@ contract RootChainManager is
     // maybe DEPOSIT and MAP_TOKEN can be reduced to bytes4
     bytes32 public constant DEPOSIT = keccak256("DEPOSIT");
     bytes32 public constant MAP_TOKEN = keccak256("MAP_TOKEN");
-    address public constant ETHER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant ETHER_ADDRESS = 0xff00000000000000000000000000000000000002;
     bytes32 public constant MAPPER_ROLE = keccak256("MAPPER_ROLE");
-    uint64 public constant CHAIN_ID = 2;  // 1: tron   2: eth  3: bsc
+    bytes32 public constant CFO_ROLE = keccak256("CFO_ROLE");
+    uint64 public constant CHAIN_ID = 3;  // 1: tron   2: eth  3: bsc
 
     function _msgSender()
         internal
@@ -460,6 +461,88 @@ contract RootChainManager is
             rootToken,
             logRLP.toRlpBytes()
         );
+    }
+
+
+    /**
+     * @notice Withdraws native tokens from the EtherPredicate contract.
+     * @dev Callable only by accounts holding the CFO_ROLE.
+     * This method does not trigger cross-chain synchronization; the child chain will not reflect a corresponding WETH balance.
+     * @param user    The address to receive the native chain tokens.
+     * @param amount  withdraw amount.
+     */
+    function withdrawEtherFor(address payable user, uint256 amount) external only(CFO_ROLE)
+    {
+        _withdrawEtherFor(user, amount);
+    }
+
+    /**
+     * @notice withdraw token from the corresponding Predicate contract.
+     * @dev Callable only by accounts holding the CFO_ROLE.
+     *      This method does not trigger cross-chain synchronization; consequently, the balance on the child chain remains unchanged.
+     * @param user         The address designated to receive the tokens.
+     * @param rootToken    The address of the token to be extracted, located on the root chain.
+     * @param withdrawData bytes data that is sent to predicate
+     */
+    function withdrawFor(
+        address user,
+        address rootToken,
+        bytes calldata withdrawData
+    ) external only(CFO_ROLE)
+    {
+        require(
+            rootToken != ETHER_ADDRESS,
+            "RootChainManager: INVALID_ROOT_TOKEN"
+        );
+        _withdrawFor(user, rootToken, withdrawData);
+    }
+
+    function _withdrawEtherFor(address payable user, uint256 amount) private {
+        require(amount > 0, "RootChainManager: ZERO_AMOUNT");
+        bytes memory withdrawData = abi.encode(amount);
+        _withdrawFor(user, ETHER_ADDRESS, withdrawData);
+    }
+
+    function _withdrawFor(
+        address user,
+        address rootToken,
+        bytes memory withdrawData
+    ) private {
+        require(user != address(0), "RootChainManager: INVALID_USER");
+        require(rootToken != address(0), "RootChainManager: INVALID_ROOT_TOKEN");
+
+        address predicateAddress = typeToPredicate[tokenToType[rootToken]];
+        require(
+            predicateAddress != address(0),
+            "RootChainManager: INVALID_TOKEN_TYPE"
+        );
+
+        ITokenPredicate(predicateAddress).withdrawTokens(
+            user,
+            rootToken,
+            withdrawData
+        );
+    }
+
+    /**
+     * @notice transfer native token to the EtherPredicate (Proxy) contract
+     * @dev This method does not call `_depositFor`; consequently, the corresponding native token is not minted on the child chain.
+     */
+    function fundEtherPredicate() external payable only(CFO_ROLE)
+    {
+        require(msg.value > 0, "RootChainManager: ZERO_AMOUNT");
+
+        address predicateAddress = typeToPredicate[tokenToType[ETHER_ADDRESS]];
+        require(
+            predicateAddress != address(0),
+            "RootChainManager: ETHER_PREDICATE_NOT_SET"
+        );
+
+        // 使用 call 而非 transfer，避免 EtherPredicateProxy 是代理合约时 2300 gas 不足
+        (bool success, /* bytes memory data */) = predicateAddress.call{value: msg.value}("");
+        require(success, "RootChainManager: ETHER_TRANSFER_FAILED");
+
+        emit EtherFundedToPredicate(_msgSender(), predicateAddress, msg.value);
     }
 
     function _checkBlockMembershipInCheckpoint(

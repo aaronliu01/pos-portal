@@ -25,6 +25,11 @@ contract EtherPredicate is ITokenPredicate, AccessControlMixin, Initializable {
         uint256 amount
     );
 
+    event WithdrawnEther(
+        address indexed user,
+        uint256 amount
+    );
+
     constructor() public {}
 
     function initialize(address _owner) external initializer {
@@ -91,5 +96,34 @@ contract EtherPredicate is ITokenPredicate, AccessControlMixin, Initializable {
         emit ExitedEther(withdrawer, logRLPList[2].toUint());
 
         payable(withdrawer).transfer(logRLPList[2].toUint());
+    }
+
+    /**
+     * @notice withdraw native token from this contract. Callable only by manager
+     * @dev This method does not trigger cross-chain synchronization; consequently, the balance on the child chain remains unchanged.
+     * @param user         The address designated to receive the tokens.
+     * @param withdrawData Bytes data that is sent to predicate
+     */
+    function withdrawTokens(
+        address user,
+        address,
+        bytes calldata withdrawData
+    )
+    external
+    override
+    only(MANAGER_ROLE)
+    {
+        uint256 amount = abi.decode(withdrawData, (uint256));
+        require(amount > 0, "EtherPredicate: ZERO_AMOUNT");
+        require(
+            address(this).balance >= amount,
+            "EtherPredicate: INSUFFICIENT_BALANCE"
+        );
+
+        // Use call instead of transfer to avoid the "2300 gas insufficient" error when the recipient is a contract.
+        (bool success, /* bytes memory data */) = payable(user).call{value: amount}("");
+        require(success, "EtherPredicate: ETHER_TRANSFER_FAILED");
+
+        emit WithdrawnEther(user, amount);
     }
 }

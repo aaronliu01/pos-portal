@@ -11,6 +11,12 @@ interface IRootChainManager {
         bytes32 indexed tokenType,
         address indexed predicateAddress
     );
+    
+    event EtherFundedToPredicate(
+        address indexed sender,
+        address indexed predicate,
+        uint256 amount
+    );
 
     function registerPredicate(bytes32 tokenType, address predicateAddress)
         external;
