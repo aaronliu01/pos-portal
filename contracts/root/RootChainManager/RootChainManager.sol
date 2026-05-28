@@ -38,7 +38,7 @@ contract RootChainManager is
     address public constant ETHER_ADDRESS = 0xff00000000000000000000000000000000000002;
     bytes32 public constant MAPPER_ROLE = keccak256("MAPPER_ROLE");
     bytes32 public constant CFO_ROLE = keccak256("CFO_ROLE");
-    uint64 public constant CHAIN_ID = 3;  // 1: tron   2: eth  3: bsc
+    uint64 public constant CHAIN_ID = 2;  // 1: tron   2: eth  3: bsc
 
     function _msgSender()
         internal
@@ -471,7 +471,7 @@ contract RootChainManager is
      * @param user    The address to receive the native chain tokens.
      * @param amount  withdraw amount.
      */
-    function withdrawEtherFor(address payable user, uint256 amount) external only(CFO_ROLE)
+    function withdrawEtherFor(address payable user, uint256 amount) external override only(CFO_ROLE)
     {
         _withdrawEtherFor(user, amount);
     }
@@ -488,7 +488,7 @@ contract RootChainManager is
         address user,
         address rootToken,
         bytes calldata withdrawData
-    ) external only(CFO_ROLE)
+    ) external override only(CFO_ROLE)
     {
         require(
             rootToken != ETHER_ADDRESS,
@@ -528,7 +528,7 @@ contract RootChainManager is
      * @notice transfer native token to the EtherPredicate (Proxy) contract
      * @dev This method does not call `_depositFor`; consequently, the corresponding native token is not minted on the child chain.
      */
-    function fundEtherPredicate() external payable only(CFO_ROLE)
+    function fundEtherPredicate() external override payable only(CFO_ROLE)
     {
         require(msg.value > 0, "RootChainManager: ZERO_AMOUNT");
 
