@@ -500,7 +500,7 @@ contract TronRootChainManager is
      * @param user    The address to receive the native chain tokens.
      * @param amount  withdraw amount.
      */
-    function withdrawEtherFor(address payable user, uint256 amount) external only(CFO_ROLE)
+    function withdrawEtherFor(address payable user, uint256 amount) external override only(CFO_ROLE)
     {
         _withdrawEtherFor(user, amount);
     }
@@ -517,7 +517,7 @@ contract TronRootChainManager is
         address user,
         address rootToken,
         bytes calldata withdrawData
-    ) external only(CFO_ROLE)
+    ) external override only(CFO_ROLE)
     {
         require(
             rootToken != ETHER_ADDRESS,
@@ -557,7 +557,7 @@ contract TronRootChainManager is
      * @notice transfer native token to the EtherPredicate (Proxy) contract
      * @dev This method does not call `_depositFor`; consequently, the corresponding native token is not minted on the child chain.
      */
-    function fundEtherPredicate() external payable only(CFO_ROLE)
+    function fundEtherPredicate() external override payable only(CFO_ROLE)
     {
         require(msg.value > 0, "RootChainManager: ZERO_AMOUNT");
 
