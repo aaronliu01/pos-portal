@@ -120,7 +120,6 @@ contract EtherPredicate is ITokenPredicate, AccessControlMixin, Initializable {
             "EtherPredicate: INSUFFICIENT_BALANCE"
         );
 
-        // Use call instead of transfer to avoid the "2300 gas insufficient" error when the recipient is a contract.
         (bool success, /* bytes memory data */) = payable(user).call{value: amount}("");
         require(success, "EtherPredicate: ETHER_TRANSFER_FAILED");
 

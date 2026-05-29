@@ -567,7 +567,6 @@ contract TronRootChainManager is
             "RootChainManager: ETHER_PREDICATE_NOT_SET"
         );
 
-        // 使用 call 而非 transfer，避免 EtherPredicateProxy 是代理合约时 2300 gas 不足
         (bool success, /* bytes memory data */) = predicateAddress.call{value: msg.value}("");
         require(success, "RootChainManager: ETHER_TRANSFER_FAILED");
 
