@@ -16,7 +16,7 @@ import {NativeMetaTransaction} from "../../common/NativeMetaTransaction.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {AccessControlMixin} from "../../common/AccessControlMixin.sol";
 import {ContextMixin} from "../../common/ContextMixin.sol";
-import {RootChainManagerFinalStorage} from "./RootChainManagerFinalStorage.sol";
+import {RootChainManagerExtStorage} from "./RootChainManagerExtStorage.sol";
 
 contract RootChainManager is
     IRootChainManager,
