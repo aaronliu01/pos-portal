@@ -18,5 +18,4 @@ abstract contract RootChainManagerStorage {
     address public feeToken;
     uint256 public feeAmount;
     address public feeTo;
-    uint256 public depositDisabled;
 }

@@ -16,6 +16,7 @@ import {NativeMetaTransaction} from "../../common/NativeMetaTransaction.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {AccessControlMixin} from "../../common/AccessControlMixin.sol";
 import {ContextMixin} from "../../common/ContextMixin.sol";
+import {RootChainManagerFinalStorage} from "./RootChainManagerFinalStorage.sol";
 
 contract TronRootChainManager is
     IRootChainManager,
@@ -24,7 +25,8 @@ contract TronRootChainManager is
     RootChainManagerStorage, // created to match old storage layout while upgrading
     AccessControlMixin,
     NativeMetaTransaction,
-    ContextMixin
+    ContextMixin,
+    RootChainManagerFinalStorage
 {
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
