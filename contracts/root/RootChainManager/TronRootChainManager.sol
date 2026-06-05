@@ -26,7 +26,7 @@ contract TronRootChainManager is
     AccessControlMixin,
     NativeMetaTransaction,
     ContextMixin,
-    RootChainManagerFinalStorage
+    RootChainManagerExtStorage
 {
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
