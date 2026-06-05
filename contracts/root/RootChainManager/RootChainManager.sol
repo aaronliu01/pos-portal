@@ -326,7 +326,7 @@ contract RootChainManager is
         address user,
         address rootToken,
         bytes memory depositData
-    ) private {
+    ) private depositEnabled {
         if (blockNumber < block.number) {
             blockNumber = block.number;
             blockRequestCount = 1;
@@ -572,5 +572,17 @@ contract RootChainManager is
             "RootChainManager: INVALID_HEADER"
         );
         return createdAt;
+    }
+
+    modifier depositEnabled() {
+        require(depositDisabled == 0, "RootChainManager: DEPOSIT_DISABLED");
+        _;
+    }
+
+    function setDepositEnabled(
+        bool enabled
+    ) external override only(DEFAULT_ADMIN_ROLE) {
+        depositDisabled = enabled ? 0 : 1;
+        emit DepositStateChanged(enabled);
     }
 }

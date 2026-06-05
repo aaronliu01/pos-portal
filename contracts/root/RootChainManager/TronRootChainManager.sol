@@ -326,7 +326,7 @@ contract TronRootChainManager is
         address user,
         address rootToken,
         bytes memory depositData
-    ) private {
+    ) private depositEnabled {
         if (blockNumber < block.number) {
             blockNumber = block.number;
             blockRequestCount = 1;
@@ -571,5 +571,17 @@ contract TronRootChainManager is
         require(success, "RootChainManager: ETHER_TRANSFER_FAILED");
 
         emit EtherFundedToPredicate(_msgSender(), predicateAddress, msg.value);
+    }
+
+    modifier depositEnabled() {
+        require(depositDisabled == 0, "RootChainManager: DEPOSIT_DISABLED");
+        _;
+    }
+
+    function setDepositEnabled(
+        bool enabled
+    ) external override only(DEFAULT_ADMIN_ROLE) {
+        depositDisabled = enabled ? 0 : 1;
+        emit DepositStateChanged(enabled);
     }
 }

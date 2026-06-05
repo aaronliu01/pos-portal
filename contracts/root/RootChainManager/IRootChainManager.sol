@@ -18,6 +18,8 @@ interface IRootChainManager {
         uint256 amount
     );
 
+    event DepositStateChanged(bool enabled);
+
     function registerPredicate(
         bytes32 tokenType,
         address predicateAddress
@@ -56,4 +58,6 @@ interface IRootChainManager {
     ) external;
 
     function fundEtherPredicate() external payable;
+
+    function setDepositEnabled(bool enabled) external;
 }
