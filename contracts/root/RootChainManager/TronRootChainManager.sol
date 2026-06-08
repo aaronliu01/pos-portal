@@ -587,11 +587,11 @@ contract TronRootChainManager is
         emit DepositStateChanged(enabled);
     }
 
-    function setMintableEnabled(bytes32 predicateType, bool enabled) external only(DEFAULT_ADMIN_ROLE) {
-        address predicateAddress = typeToPredicate[predicateType];
+    function setMintableEnabled(bytes32 mintableTokenType, bool enabled) external only(DEFAULT_ADMIN_ROLE) {
+        address predicateAddress = typeToPredicate[mintableTokenType];
         require(
             predicateAddress != address(0),
-            "RootChainManager: PREDICATE_NOT_SET"
+            "RootChainManager: INVALID_MINTABLE_TOKEN_TYPE"
         );
 
         ITokenPredicate(predicateAddress).setMintableEnabled(enabled);
