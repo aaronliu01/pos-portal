@@ -593,7 +593,7 @@ contract TronRootChainManager is
         address predicateAddress = typeToPredicate[predicateType];
         require(
             predicateAddress != address(0),
-            "RootChainManager: INVALID_TOKEN_TYPE"
+            "RootChainManager: PREDICATE_NOT_SET"
         );
 
         ITokenPredicate(predicateAddress).setMintableEnabled(enabled);
