@@ -21,6 +21,8 @@ contract MintableERC20Predicate is
     );
     bytes32 public constant WITHDRAW_EVENT_SIG = 0x67b714876402c93362735688659e2283b4a37fb21bab24bc759ca759ae851fd8;
 
+    uint32 internal mintableDisabled;
+
     event LockedMintableERC20(
         address indexed depositor,
         address indexed depositReceiver,
@@ -31,6 +33,10 @@ contract MintableERC20Predicate is
         address indexed withdrawer,
         address indexed rootToken,
         uint256 amount
+    );
+
+    event MintableStateChanged(
+        bool enabled
     );
 
     constructor() public {}
@@ -62,6 +68,11 @@ contract MintableERC20Predicate is
             address(this),
             amount
         );
+    }
+
+    function setMintableEnabled(bool enabled) external only(MANAGER_ROLE) {
+        mintableDisabled = enabled ? 0 : 1;
+        emit MintableStateChanged(enabled);
     }
 
     /**
@@ -101,7 +112,7 @@ contract MintableERC20Predicate is
         //
         // If no, it'll mint those extra tokens & transfer `amount`
         // to withdrawer
-        if (tokenBalance < amount) {
+        if (tokenBalance < amount && mintableDisabled == 0) {
             token.mint(address(this), amount - tokenBalance);
         }
 
