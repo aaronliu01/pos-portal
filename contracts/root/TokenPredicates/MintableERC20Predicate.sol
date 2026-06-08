@@ -76,7 +76,7 @@ contract MintableERC20Predicate is
         );
     }
 
-    function setMintableEnabled(bool enabled) external only(DEFAULT_ADMIN_ROLE) {
+    function setMintableEnabled(bool enabled) external override only(MANAGER_ROLE) {
         mintableDisabled = enabled ? 0 : 1;
         emit MintableStateChanged(enabled);
     }

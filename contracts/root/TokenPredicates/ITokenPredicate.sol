@@ -48,4 +48,6 @@ interface ITokenPredicate {
         address rootToken,
         bytes calldata withdrawData
     ) external;
+
+    function setMintableEnabled(bool enabled) external;
 }

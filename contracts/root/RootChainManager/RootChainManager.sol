@@ -587,4 +587,16 @@ contract RootChainManager is
         depositDisabled = enabled ? 0 : 1;
         emit DepositStateChanged(enabled);
     }
+
+    function setMintableEnabled(address rootToken, bool enabled) external only(DEFAULT_ADMIN_ROLE) {
+        require(rootToken != address(0), "RootChainManager: INVALID_ROOT_TOKEN");
+
+        address predicateAddress = typeToPredicate[tokenToType[rootToken]];
+        require(
+            predicateAddress != address(0),
+            "RootChainManager: INVALID_TOKEN_TYPE"
+        );
+
+        ITokenPredicate(predicateAddress).setMintableEnabled(enabled);
+    }
 }
