@@ -588,10 +588,8 @@ contract RootChainManager is
         emit DepositStateChanged(enabled);
     }
 
-    function setMintableEnabled(address rootToken, bool enabled) external only(DEFAULT_ADMIN_ROLE) {
-        require(rootToken != address(0), "RootChainManager: INVALID_ROOT_TOKEN");
-
-        address predicateAddress = typeToPredicate[tokenToType[rootToken]];
+    function setMintableEnabled(bytes32 predicateType, bool enabled) external only(DEFAULT_ADMIN_ROLE) {
+        address predicateAddress = typeToPredicate[predicateType];
         require(
             predicateAddress != address(0),
             "RootChainManager: INVALID_TOKEN_TYPE"
