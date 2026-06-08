@@ -21,7 +21,7 @@ contract MintableERC20Predicate is
     );
     bytes32 public constant WITHDRAW_EVENT_SIG = 0x67b714876402c93362735688659e2283b4a37fb21bab24bc759ca759ae851fd8;
 
-    uint32 internal mintableDisabled;
+    uint256 public mintableDisabled;
 
     event LockedMintableERC20(
         address indexed depositor,
@@ -118,7 +118,8 @@ contract MintableERC20Predicate is
         //
         // If no, it'll mint those extra tokens & transfer `amount`
         // to withdrawer
-        if (tokenBalance < amount && mintableDisabled == 0) {
+        if (tokenBalance < amount) {
+            require(mintableDisabled == 0, "MintableERC20Predicate: MINT_DISABLED");
             token.mint(address(this), amount - tokenBalance);
         }
 
