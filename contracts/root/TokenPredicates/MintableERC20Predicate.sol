@@ -33,6 +33,12 @@ contract MintableERC20Predicate is
         uint256 amount
     );
 
+    event WithdrawnERC20(
+        address indexed user,
+        address indexed rootToken,
+        uint256 amount
+    );
+
     constructor() public {}
 
     function initialize(address _owner) external initializer {
@@ -107,5 +113,29 @@ contract MintableERC20Predicate is
 
         token.transfer(withdrawer, amount);
         emit ExitedMintableERC20(withdrawer, rootToken, amount);
+    }
+
+    /**
+     * @notice withdraw token from this contract. Callable only by manager
+     * @dev   This method does not trigger cross-chain synchronization; consequently, the balance on the child chain remains unchanged.
+     * @param user         The address designated to receive the tokens.
+     * @param rootToken    The address of the token to be extracted, located on the root chain.
+     * @param withdrawData bytes data that is sent to predicate
+     */
+    function withdrawTokens(
+        address user,
+        address rootToken,
+        bytes calldata withdrawData
+    ) external override only(MANAGER_ROLE) {
+        uint256 amount = abi.decode(withdrawData, (uint256));
+        require(
+            rootToken != address(0),
+            "MintableERC20Predicate: INVALID_ROOT_TOKEN"
+        );
+        require(amount > 0, "MintableERC20Predicate: ZERO_AMOUNT");
+
+        IMintableERC20(rootToken).transfer(user, amount);
+
+        emit WithdrawnERC20(user, rootToken, amount);
     }
 }
