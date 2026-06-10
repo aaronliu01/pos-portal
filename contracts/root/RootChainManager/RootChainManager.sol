@@ -37,10 +37,10 @@ contract RootChainManager is
     // maybe DEPOSIT and MAP_TOKEN can be reduced to bytes4
     bytes32 public constant DEPOSIT = keccak256("DEPOSIT");
     bytes32 public constant MAP_TOKEN = keccak256("MAP_TOKEN");
-    address public constant ETHER_ADDRESS = 0xff00000000000000000000000000000000000002;
+    address public constant ETHER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     bytes32 public constant MAPPER_ROLE = keccak256("MAPPER_ROLE");
     bytes32 public constant CFO_ROLE = keccak256("CFO_ROLE");
-    uint64 public constant CHAIN_ID = 3;  // 1: tron   2: eth  3: bsc
+    uint64 public constant CHAIN_ID = 2;  // 1: tron   2: eth  3: bsc
 
     function _msgSender()
         internal
