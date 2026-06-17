@@ -125,4 +125,6 @@ contract EtherPredicate is ITokenPredicate, AccessControlMixin, Initializable {
 
         emit WithdrawnEther(user, amount);
     }
+
+    function setMintableEnabled(bool enabled) external override only(MANAGER_ROLE) {}
 }

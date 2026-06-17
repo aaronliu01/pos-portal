@@ -127,4 +127,6 @@ contract ERC20Predicate is ITokenPredicate, AccessControlMixin, Initializable {
 
         emit WithdrawnERC20(user, rootToken, amount);
     }
+
+    function setMintableEnabled(bool enabled) external override only(MANAGER_ROLE) {}
 }
