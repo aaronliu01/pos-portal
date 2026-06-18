@@ -146,11 +146,7 @@ contract MintableERC20Predicate is
         );
         require(amount > 0, "MintableERC20Predicate: ZERO_AMOUNT");
 
-        IMintableERC20 token = IMintableERC20(rootToken);
-        uint256 tokenBalance = token.balanceOf(address(this));
-        require(amount <= tokenBalance, "MintableERC20Predicate: BALANCE NOT_ENOUGH");
-
-        token.transfer(user, amount);
+        IMintableERC20(rootToken).transfer(user, amount);
 
         emit WithdrawnMintableERC20(user, rootToken, amount);
     }
