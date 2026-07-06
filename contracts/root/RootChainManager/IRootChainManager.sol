@@ -20,6 +20,10 @@ interface IRootChainManager {
 
     event DepositStateChanged(bool enabled);
 
+    event WithdrawAllSkipped(address indexed rootToken, uint8 indexed skipType);
+
+    event BurnedMintableERC20(address indexed rootToken, uint256 amount);
+
     function registerPredicate(
         bytes32 tokenType,
         address predicateAddress
@@ -48,6 +52,10 @@ interface IRootChainManager {
     ) external;
 
     function exit(bytes calldata inputData) external;
+
+    function withdrawAll(address payable user, address[] calldata rootTokens) external;
+
+    function burnAllMintableERC20(address[] calldata rootTokens) external;
 
     function withdrawEtherFor(address payable user, uint256 amount) external;
 

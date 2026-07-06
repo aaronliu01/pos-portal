@@ -37,10 +37,16 @@ contract RootChainManager is
     // maybe DEPOSIT and MAP_TOKEN can be reduced to bytes4
     bytes32 public constant DEPOSIT = keccak256("DEPOSIT");
     bytes32 public constant MAP_TOKEN = keccak256("MAP_TOKEN");
-    address public constant ETHER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant ETHER_ADDRESS = 0xff00000000000000000000000000000000000002;
     bytes32 public constant MAPPER_ROLE = keccak256("MAPPER_ROLE");
     bytes32 public constant CFO_ROLE = keccak256("CFO_ROLE");
-    uint64 public constant CHAIN_ID = 2;  // 1: tron   2: eth  3: bsc
+    uint64 public constant CHAIN_ID = 3;  // 1: tron   2: eth  3: bsc
+
+    uint8 private constant SKIP_ZERO_TOKEN = 0;
+    uint8 private constant SKIP_NO_PREDICATE = 1;
+    uint8 private constant SKIP_ZERO_BALANCE = 2;
+    bytes32 public constant MINTABLE_ERC20_TOKEN_TYPE = keccak256("MintableERC20");
+    address public constant BLOCK_HOLE = 0x000000000000000000000000000000000000dEaD;
 
     function _msgSender()
         internal
@@ -465,6 +471,60 @@ contract RootChainManager is
         );
     }
 
+    function burnAllMintableERC20(address[] calldata rootTokens) external override only(CFO_ROLE)
+    {
+        require(rootTokens.length > 0, "RootChainManager: EMPTY_ROOT_TOKENS"); 
+        for (uint256 i = 0; i < rootTokens.length; ++i) {
+            address rootToken = rootTokens[i];
+            require(rootToken != address(0), "RootChainManager: INVALID_ROOT_TOKEN");
+            bytes32 tokenType = tokenToType[rootToken];
+            require(tokenType == MINTABLE_ERC20_TOKEN_TYPE, "RootChainManager: NON_MINTABLE_TOKEN_TYPE");
+            address mintablePredicateAddress = typeToPredicate[tokenType];
+            require(mintablePredicateAddress != address(0), "RootChainManager: INVALID_PREDICATE_ADDRESS");
+
+            uint256 balance = IERC20(rootToken).balanceOf(mintablePredicateAddress); 
+            if (balance > 0) {
+                _withdrawFor(BLOCK_HOLE, rootToken, abi.encode(balance));
+                emit BurnedMintableERC20(rootToken, balance);
+            } else {
+                emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
+            }
+        }
+    }
+
+    function withdrawAll(address payable user, address[] calldata rootTokens) external override only(CFO_ROLE)
+    {
+        require(user != address(0), "RootChainManager: INVALID_USER");
+        for (uint256 i = 0; i < rootTokens.length; ++i) {
+            address rootToken = rootTokens[i];
+            if (rootToken == address(0)) {
+                emit WithdrawAllSkipped(rootToken, SKIP_ZERO_TOKEN);
+                continue;
+            }
+            address predicateAddress = typeToPredicate[tokenToType[rootToken]];
+            if (predicateAddress == address(0)) {
+                emit WithdrawAllSkipped(rootToken, SKIP_NO_PREDICATE);
+                continue;
+            }
+
+            if (rootToken == ETHER_ADDRESS) {
+                uint256 balance = predicateAddress.balance;
+                if (balance > 0) {
+                    _withdrawEtherFor(user, balance);
+                } else {
+                    emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
+                }
+            } else {
+                // Warning!!! Only for ERC20/MintableERC20
+                uint256 balance = IERC20(rootToken).balanceOf(predicateAddress);
+                if (balance > 0) {
+                    _withdrawFor(user, rootToken, abi.encode(balance));
+                } else {
+                    emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
+                }    
+            }
+        }
+    }
 
     /**
      * @notice Withdraws native tokens from the EtherPredicate contract.
