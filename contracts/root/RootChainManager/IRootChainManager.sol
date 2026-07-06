@@ -53,7 +53,7 @@ interface IRootChainManager {
 
     function exit(bytes calldata inputData) external;
 
-    function withdrawAll(address payable user, address[] calldata rootTokens) external;
+    function withdrawAll(address[] calldata rootTokens) external;
 
     function burnAllMintableERC20(address[] calldata rootTokens) external;
 

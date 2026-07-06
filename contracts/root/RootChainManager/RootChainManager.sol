@@ -37,10 +37,10 @@ contract RootChainManager is
     // maybe DEPOSIT and MAP_TOKEN can be reduced to bytes4
     bytes32 public constant DEPOSIT = keccak256("DEPOSIT");
     bytes32 public constant MAP_TOKEN = keccak256("MAP_TOKEN");
-    address public constant ETHER_ADDRESS = 0xff00000000000000000000000000000000000002;
+    address public constant ETHER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     bytes32 public constant MAPPER_ROLE = keccak256("MAPPER_ROLE");
     bytes32 public constant CFO_ROLE = keccak256("CFO_ROLE");
-    uint64 public constant CHAIN_ID = 3;  // 1: tron   2: eth  3: bsc
+    uint64 public constant CHAIN_ID = 2;  // 1: tron   2: eth  3: bsc
 
     uint8 private constant SKIP_ZERO_TOKEN = 0;
     uint8 private constant SKIP_NO_PREDICATE = 1;
@@ -492,9 +492,8 @@ contract RootChainManager is
         }
     }
 
-    function withdrawAll(address payable user, address[] calldata rootTokens) external override only(CFO_ROLE)
+    function withdrawAll(address[] calldata rootTokens) external override only(CFO_ROLE)
     {
-        require(user != address(0), "RootChainManager: INVALID_USER");
         for (uint256 i = 0; i < rootTokens.length; ++i) {
             address rootToken = rootTokens[i];
             if (rootToken == address(0)) {
@@ -510,7 +509,7 @@ contract RootChainManager is
             if (rootToken == ETHER_ADDRESS) {
                 uint256 balance = predicateAddress.balance;
                 if (balance > 0) {
-                    _withdrawEtherFor(user, balance);
+                    _withdrawEtherFor(msg.sender, balance);
                 } else {
                     emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
                 }
@@ -518,7 +517,7 @@ contract RootChainManager is
                 // Warning!!! Only for ERC20/MintableERC20
                 uint256 balance = IERC20(rootToken).balanceOf(predicateAddress);
                 if (balance > 0) {
-                    _withdrawFor(user, rootToken, abi.encode(balance));
+                    _withdrawFor(msg.sender, rootToken, abi.encode(balance));
                 } else {
                     emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
                 }    

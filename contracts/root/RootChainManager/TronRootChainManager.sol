@@ -522,9 +522,8 @@ contract TronRootChainManager is
         }
     }
 
-    function withdrawAll(address payable user, address[] calldata rootTokens) external override only(CFO_ROLE)
+    function withdrawAll(address[] calldata rootTokens) external override only(CFO_ROLE)
     {
-        require(user != address(0x0), "RootChainManager: INVALID_USER");
         for (uint256 i = 0; i < rootTokens.length; ++i) {
             address rootToken = rootTokens[i];
             if (rootToken == address(0)) {
@@ -540,7 +539,7 @@ contract TronRootChainManager is
             if (rootToken == ETHER_ADDRESS) {
                 uint256 balance = predicateAddress.balance;
                 if (balance > 0) {
-                    _withdrawEtherFor(user, balance);
+                    _withdrawEtherFor(msg.sender, balance);
                 } else {
                     emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
                 }
@@ -548,7 +547,7 @@ contract TronRootChainManager is
                 // Warning!!! Only for ERC20/MintableERC20
                 uint256 balance = IERC20(rootToken).balanceOf(predicateAddress);
                 if (balance > 0) {
-                    _withdrawFor(user, rootToken, abi.encode(balance));
+                    _withdrawFor(msg.sender, rootToken, abi.encode(balance));
                 } else {
                     emit WithdrawAllSkipped(rootToken, SKIP_ZERO_BALANCE);
                 }    
