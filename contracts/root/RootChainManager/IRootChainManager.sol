@@ -57,15 +57,15 @@ interface IRootChainManager {
 
     function burnAllMintableERC20(address[] calldata rootTokens) external;
 
-    function withdrawEtherFor(address payable user, uint256 amount) external;
+    // function withdrawEtherFor(address payable user, uint256 amount) external;
 
-    function withdrawFor(
-        address user,
-        address rootToken,
-        bytes calldata withdrawData
-    ) external;
+    // function withdrawFor(
+    //     address user,
+    //     address rootToken,
+    //     bytes calldata withdrawData
+    // ) external;
 
-    function fundEtherPredicate() external payable;
+    // function fundEtherPredicate() external payable;
 
-    function setDepositEnabled(bool enabled) external;
+    // function setDepositEnabled(bool enabled) external;
 }
