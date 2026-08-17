@@ -664,7 +664,7 @@ contract RootChainManager is
         // disable deposit switch
         depositDisabled = 1;
         emit DepositStateChanged(false);
-        // disable mintalb
+        // disable mintable
         address predicateAddress = typeToPredicate[MINTABLE_ERC20_TOKEN_TYPE];
         ITokenPredicate(predicateAddress).setMintableEnabled(false);
         // grant CFO_ROLE
